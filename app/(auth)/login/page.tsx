@@ -1,43 +1,44 @@
 "use client";
 
-import { createAdminSession } from "@/actions/create-admin-session";
-import { createLoginSession } from "@/actions/create-login-session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAction } from "@/hooks/use-action";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { ElementRef, useRef } from "react";
+import { toast } from "sonner";
 
 const Login = (props: any) => {
+  const formRef = useRef<ElementRef<"form">>(null);
   const context = props.searchParams.context;
-
-  const { execute: executeAdminLogin } = useAction(createAdminSession, {
-    onSuccess: (data) => {
-      console.log(data);
-    },
-  });
-
-  const { execute: executeUserLogin } = useAction(createLoginSession, {
-    onSuccess: (data) => {
-      console.log(data);
-    },
-  });
+  const router = useRouter();
 
   function handleAdminLogin(formData: FormData) {
     const adminKey = formData.get("adminKey") as string;
-    executeAdminLogin({ adminKey, userId: "1" });
+    // executeAdminLogin({ adminKey, userId: "1" });
   }
 
-  function handleLogin(formData: FormData) {
+  async function handleLogin(formData: FormData) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    executeUserLogin({ email, password });
+    try {
+      const result = await fetch("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (result.ok) {
+        toast.success("Login successful");
+        router.push("/");
+      }
+    } catch (error) {
+      toast.error("Login failed");
+    }
   }
 
   if (context === "admin") {
     return (
       <div>
         <h1>Admin Login</h1>
-        <form action={handleAdminLogin}>
+        <form ref={formRef} action={handleAdminLogin}>
           <Input
             type="text"
             placeholder="Please enter your admin key"
