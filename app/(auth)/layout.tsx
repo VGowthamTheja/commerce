@@ -1,8 +1,18 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const nextCookies = cookies();
+  const payload = nextCookies.get("token");
+
+  if (payload?.value) {
+    return redirect("/");
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
       <main className="flex flex-col items-center justify-center flex-1 px-20 text-center">

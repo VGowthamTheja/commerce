@@ -2,15 +2,11 @@ import { cookies } from "next/headers";
 
 import Link from "next/link";
 import { Button } from "./ui/button";
+import Logout from "./logout";
 
 export default function Navbar() {
   const cookieStore = cookies();
   const token = cookieStore.get("token");
-
-  async function handleLogout() {
-    cookieStore.delete("token");
-    await fetch("/api/auth/logout");
-  }
 
   return (
     <nav className="flex items-center justify-between space-x-4 mt-4">
@@ -28,11 +24,7 @@ export default function Navbar() {
             </Link>
           </>
         ) : (
-          <form action={handleLogout}>
-            <Button type="submit" variant={"destructive"} size={"sm"}>
-              Logout
-            </Button>
-          </form>
+          <Logout cookieStore={cookieStore} />
         )}
       </div>
     </nav>
