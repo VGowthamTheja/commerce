@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { UserProfile } from "@prisma/client";
-import { Settings, User2 } from "lucide-react";
+import { Settings, Shield, User2 } from "lucide-react";
 
 import { getRandomHexColor } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -77,6 +77,15 @@ const UserProfileDropdown = ({}: Props) => {
               <Settings />
               <span className="ml-2">Settings</span>
             </Link>
+            {profile?.adminKey && (
+              <Link
+                href={"/admin"}
+                className="flex items-center p-2 hover:bg-neutral-300 rounded-md"
+              >
+                <Shield />
+                <span className="ml-2">Admin</span>
+              </Link>
+            )}
           </div>
           <Separator />
           <form action={handleLogout}>
