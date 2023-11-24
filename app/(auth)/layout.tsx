@@ -8,8 +8,9 @@ export default function AuthLayout({
 }) {
   const nextCookies = cookies();
   const payload = nextCookies.get("token");
+  const adminKey = nextCookies.get("adminKey")?.value;
 
-  if (payload?.value) {
+  if (payload?.value && adminKey === "false") {
     return redirect("/");
   }
 

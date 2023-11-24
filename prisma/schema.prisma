@@ -41,7 +41,7 @@ model UserRoles {
 model Session {
   id          String      @id @default(uuid())
   userId      String
-  token       String      @unique
+  token       String      @db.Text
   sessionType SessionType @default(user)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -58,6 +58,7 @@ model UserProfile {
   id        String   @id @default(uuid())
   userId    String   @unique
   firstName String
+  avatar    String?  @db.LongText
   lastName  String
   bio       String?
   adminKey  String?

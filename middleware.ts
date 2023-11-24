@@ -1,11 +1,24 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { parseJwt } from "@/lib/utils";
+import { db } from "./lib/prisma";
 
-const PUBLIC_ROUTES = ["/", "/login", "/register"];
+const PUBLIC_ROUTES = ["/login", "/register"];
 
 // This function can be marked `async` if using `await` inside
-export function middleware(req: NextRequest, ...rest: any) {
+export async function middleware(req: NextRequest, ...rest: any) {
   const payload = parseJwt(req.cookies.get("token")?.value!);
+
+  const adminKey = req.cookies.get("adminKey")?.value;
+  const adminAccess = req.cookies.get("adminAccess")?.value;
+
+  if (req.nextUrl.pathname.startsWith("/admin") && adminAccess === "true") {
+    return NextResponse.next();
+  }
+
+  if (req.nextUrl.pathname.startsWith("/admin") && adminKey === "true") {
+    return NextResponse.redirect(new URL("/login?context=admin", req.nextUrl));
+  }
 
   if (payload && !PUBLIC_ROUTES.includes(req.nextUrl.pathname)) {
     return NextResponse.next();
@@ -26,8 +39,3 @@ export function middleware(req: NextRequest, ...rest: any) {
 export const config = {
   matcher: ["/api/v1/:path*", "/admin/:path*"],
 };
-
-function parseJwt(token: string) {
-  if (!token) return null;
-  return JSON.parse(Buffer.from(token.split(".")[1], "base64").toString());
-}

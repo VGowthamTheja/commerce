@@ -30,11 +30,26 @@ export async function POST(req: NextRequest) {
     { expiresIn: "1h" }
   );
 
+  const session = await db.session.create({
+    data: {
+      token,
+      userId: user.id,
+    },
+  });
+
+  const profile = await db.userProfile.findUnique({
+    where: { userId: user.id },
+  });
+
   return NextResponse.json(
     {},
     {
       status: 200,
-      headers: { "Set-Cookie": `token=${token}; Path=/; HttpOnly` },
+      headers: {
+        "Set-Cookie": `sessionId=${
+          session.id
+        }; HttpOnly; Path=/, token=${token}; HttpOnly; Path=/, adminKey=${!!profile?.adminKey}; HttpOnly; Path=/`,
+      },
     }
   );
 }

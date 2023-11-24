@@ -1,13 +1,12 @@
 import { cookies } from "next/headers";
-
 import Link from "next/link";
-import { Button } from "./ui/button";
-import Logout from "./logout";
 
-export default function Navbar() {
+import { Button } from "./ui/button";
+import UserProfileDropdown from "./user-profile-dropdown";
+
+export default async function Navbar() {
   const cookieStore = cookies();
   const token = cookieStore.get("token");
-
   return (
     <nav className="flex items-center justify-between space-x-4 mt-4">
       <div>
@@ -24,7 +23,7 @@ export default function Navbar() {
             </Link>
           </>
         ) : (
-          <Logout cookieStore={cookieStore} />
+          <UserProfileDropdown />
         )}
       </div>
     </nav>

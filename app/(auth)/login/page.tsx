@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { ElementRef, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -15,9 +16,25 @@ const Login = (props: any) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  function handleAdminLogin(formData: FormData) {
+  async function handleAdminLogin(formData: FormData) {
     const adminKey = formData.get("adminKey") as string;
-    // executeAdminLogin({ adminKey, userId: "1" });
+    try {
+      const res = await fetch("/api/auth/admin-auth", {
+        method: "POST",
+        body: JSON.stringify({ adminKey }),
+      });
+
+      if (res.status === 401) {
+        toast.error("Invalid admin key");
+      }
+
+      if (res.ok) {
+        toast.success("Admin key is valid");
+        router.push("/admin/dashboard");
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
   }
 
   async function handleLogin(formData: FormData) {
@@ -34,6 +51,31 @@ const Login = (props: any) => {
         toast.success("Login successful");
         router.push("/");
       }
+
+      if (result.status === 401) {
+        toast.error("Invalid credentials");
+      }
+
+      if (result.status === 500) {
+        toast.error("Something went wrong!");
+      }
+
+      if (result.status === 404) {
+        toast.error(
+          <div>
+            <p>
+              User not found. Please register{" "}
+              <Link
+                href={`/register?regEmail=${email}`}
+                className="text-sky-600 underline"
+              >
+                here
+              </Link>{" "}
+            </p>
+          </div>,
+          { duration: 3000 }
+        );
+      }
     } catch (error) {
       toast.error("Login failed");
     } finally {
@@ -43,14 +85,28 @@ const Login = (props: any) => {
 
   if (context === "admin") {
     return (
-      <div>
-        <h1>Admin Login</h1>
+      <div className="border rounded-md p-5 shadow-lg">
+        <h1 className="text-2xl font-bold mb-2">Admin Login</h1>
+        <p className="text-xs text-gray-500 mb-2">
+          You need to enter your admin key to access this page
+        </p>
         <form ref={formRef} action={handleAdminLogin}>
           <Input
             type="text"
             placeholder="Please enter your admin key"
             name="adminKey"
           />
+          <Button
+            size={"sm"}
+            disabled={isLoading}
+            className="w-full mt-4"
+            type="submit"
+          >
+            {isLoading && <Loader2 className="animate-spin" />}
+            <span className="ml-3">
+              {isLoading ? "Requesting..." : "Request Access"}
+            </span>
+          </Button>
         </form>
       </div>
     );
@@ -69,7 +125,7 @@ const Login = (props: any) => {
         <div>
           <Label
             htmlFor="password"
-            className="text-md font-semibold float-left"
+            className="text-md font-semibold float-left mt-2"
           >
             Password
           </Label>
